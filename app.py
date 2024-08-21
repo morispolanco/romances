@@ -1,9 +1,10 @@
 import streamlit as st
-import together
-import secrets
+import nltk
+import random
 
-# Esconder la API Key en los secretos de Streamlit
-API_KEY = secrets.get("TOGETHER_API_KEY")
+# Cargar el corpus de palabras
+nltk.download('words')
+nltk.download('cmudict')
 
 # Definir la función para generar un romance
 def generar_romance(num_versos, tema):
@@ -19,9 +20,9 @@ def generar_romance(num_versos, tema):
     for i in range(num_versos):
         verso = ""
         if i % 2 == 0:
-            verso += f"{rimas['a'][i//2]} "
+            verso += f"{random.choice(rimas['a'])} "
         else:
-            verso += f"{rimas['b'][i//2]} "
+            verso += f"{random.choice(rimas['b'])} "
         verso += f"{tema} "
         verso += f"{estructura}"
         romance.append(verso)
