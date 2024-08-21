@@ -5,8 +5,16 @@ import os
 # Ocultar la clave API en los secretos de Streamlit
 API_KEY = st.secrets["TOGETHER_API_KEY"]
 
+def check_api_availability():
+    try:
+        response = requests.get("https://api.together.xyz/v1/ping", headers={"Authorization": f"Bearer {API_KEY}"})
+        response.raise_for_status()
+        return True
+    except Exception as e:
+        st.error(f"La API de Together no está disponible: {e}")
+        return False
+
 def generate_verse():
-    """Genera un verso de romance utilizando la API de Together"""
     try:
         response = requests.post(
             "https://api.together.xyz/v1/chat/completions",
@@ -27,8 +35,13 @@ def generate_verse():
             },
         )
         response.raise_for_status()
-        verse = response.json()["choices"][0]["text"].strip()
-        return verse
+        json_response = response.json()
+        if "choices" in json_response and json_response["choices"]:
+            verse = json_response["choices"][0]["text"].strip()
+            return verse
+        else:
+            st.error("La respuesta de la API no contiene el campo 'choices'.")
+            return ""
     except Exception as e:
         st.error(f"Error generando el verso: {e}")
         return ""
@@ -55,6 +68,8 @@ def main():
     if st.button("Generar Romance"):
         if num_verses > 99:
             st.write("Lo siento, el máximo de versos es 99.")
+        elif not check_api_availability():
+            st.write("Lo siento, la API de Together no está disponible en este momento. Por favor, inténtalo de nuevo más tarde.")
         else:
             try:
                 romance = generate_romance(int(num_verses))
