@@ -8,11 +8,28 @@ API_KEY = st.secrets["TOGETHER_API_KEY"]
 def generate_verse():
     """Genera un verso de romance utilizando la API de Together"""
     try:
-        response = requests.get(f'https://api.together.xyz/v1/generate?prompt=romance&max_tokens=50&temperature=0.7&top_p=0.9&n=1&seed=42', headers={'Authorization': f'Bearer {API_KEY}'})
+        response = requests.post(
+            "https://api.together.xyz/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo",
+                "messages": [],
+                "max_tokens": 50,
+                "temperature": 0.7,
+                "top_p": 0.7,
+                "top_k": 50,
+                "repetition_penalty": 1,
+                "stop": ["<|eot_id|>"],
+                "stream": True,
+            },
+        )
         response.raise_for_status()
-        verse = response.json()['generated_text']
-        return verse.strip()
-    except requests.exceptions.RequestException as e:
+        verse = response.json()["choices"][0]["text"].strip()
+        return verse
+    except Exception as e:
         st.error(f"Error generando el verso: {e}")
         return ""
 
@@ -26,7 +43,7 @@ def generate_romance(num_verses):
                 romance.append(f"{i+1} {verse},")
             else:
                 romance.append(f"{i+1} {verse}")
-    return '\n'.join(romance)
+    return "\n".join(romance)
 
 def main():
     st.set_page_config(page_title="Generador de Romances")
