@@ -1,2 +1,4 @@
 nltk
 streamlit
+nltk.download('words')
+nltk.download('cmudict')
